@@ -8,7 +8,7 @@ open FParsec.CharParsers
 
 open FParsec.Test.Test
 
-let monadicParser (): Parser<string * string , unit> =
+let monadicParser: Parser<_, unit> =
     parse {
         let letters = many1Chars (satisfy isLetter)
         do! spaces
@@ -18,22 +18,63 @@ let monadicParser (): Parser<string * string , unit> =
         return token1, token2
     }
 
-let applicativeParser () =
+let applicativeParser: Parser<_, unit> =
     parse {
         let letters = many1Chars (satisfy isLetter)
         let! _ = spaces
         and! token1 = letters
         and! _ = spaces
         and! token2 = letters
-        return token1 token2
+        return (token1, token2)
     }
 
 let testMonadicCE () =
-    ROk "   hi hello" 0 ("hi", "hello") (monadicParser())
+    match runParserOnString monadicParser () "blah" "hi hello" with
+    | ParserResult.Failure (m,_,_) -> failwith m
+    | ParserResult.Success _ -> ()
 
 let testApplicativeCE () =
-    ROk "   hi hello" 0 "hi" (applicativeParser())
+    match runParserOnString applicativeParser () "blah" "hi hello" with
+    | ParserResult.Failure (m,_,_) -> failwith m
+    | ParserResult.Success _ -> ()
+
+let run() =
+        testMonadicCE ()
+        testApplicativeCE ()
+
+module Perf =
+    open FParsec.Primitives
+    open FSharp.Quotations
+
+    let parse = QuotedParserCombinator()
+
+    let monadicParser: Expr<Parser<_, unit>> =
+        parse {
+            let letters = many1Chars (satisfy isLetter)
+            do! spaces
+            let! token1 = letters
+            do! spaces
+            let! token2 = letters
+            return token1, token2
+        }
+
+    let applicativeParser: Expr<Parser<_, unit>> =
+        parse {
+            let letters = many1Chars (satisfy isLetter)
+            let! _ = spaces
+            and! token1 = letters
+            and! _ = spaces
+            and! token2 = letters
+            return (token1, token2)
+        }
 
 
-let run() = ()
+    let testPerf () =
+        let m = monadicParser
+        let a = applicativeParser
+        printfn "monadic:\n%A" m
+        printfn "applicative:\n%A" a
+        ()
+
+
 

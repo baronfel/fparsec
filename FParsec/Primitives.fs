@@ -919,20 +919,24 @@ let chainr p op x = chainr1 p op <|>% x
 // ------------------------------
 // Computation expression syntax
 // ------------------------------
-[<Sealed>]
+//[<Sealed>]
 type ParserCombinator() =
     member t.Delay(f:(unit -> Parser<'a,'u>)) = fun stream -> (f()) stream
     member t.Return(x) = preturn x
     member t.Bind(p: Parser<'a, 'state>, f : 'a -> Parser<'b, 'state>): Parser<'b, 'state> = p >>= f
-    member t.Bind2((p1: Parser<'a, 'state>, p2: Parser<'b, 'state>), f: 'a -> 'b -> Parser<'c, 'state>): Parser<'c, 'state> =
-            let tup = zip p1 p2
-            tup >>= fun (p, q) -> f p q
-    member t.Bind3((p1, p2, p3), f) =
-         zip (zip p1 p2) p3 >>= (fun ((p1, p2), p3) -> f p1 p2 p3)
-    member t.Bind4((p1, p2, p3, p4), f) =
-        zip (zip (zip p1 p2) p3) p4 >>= (fun (((p1, p2), p3), p4) -> f p1 p2 p3 p4)
-    member t.Bind5((p1, p2, p3, p4, p5), f) =
-        zip (zip (zip (zip p1 p2) p3) p4) p5 >>= (fun ((((p1, p2), p3), p4), p5) -> f p1 p2 p3 p4 p5)
+    member t.BindReturn(p: Parser<'a, 'state>, f: 'a -> 'b): Parser<'b, 'state> = p |>> f
+
+//    member t.Bind2(p1: Parser<'a, 'state>, p2: Parser<'b, 'state>, f: 'a -> 'b -> Parser<'c, 'state>): Parser<'c, 'state> =
+//            let tup = zip p1 p2
+//            tup >>= fun (p, q) -> f p q
+//    member t.Bind3(p1, p2, p3, f) =
+//         zip (zip p1 p2) p3 >>= (fun ((p1, p2), p3) -> f p1 p2 p3)
+//    member t.Bind4(p1, p2, p3, p4, f) =
+//        zip (zip (zip p1 p2) p3) p4 >>= (fun (((p1, p2), p3), p4) -> f p1 p2 p3 p4)
+//    member t.Bind5(p1, p2, p3, p4, p5, f) =
+//        zip (zip (zip (zip p1 p2) p3) p4) p5 >>= (fun ((((p1, p2), p3), p4), p5) -> f p1 p2 p3 p4 p5)
+
+    member t.MergeSources(p1, p2) = p1 .>>. p2
     member t.Zero() : Parser<'a,'u> = pzero
     member t.ReturnFrom(p: Parser<'a,'u>) = p
     // no Combine member by purpose
@@ -942,6 +946,11 @@ type ParserCombinator() =
     member t.TryFinally(p:Parser<'a,'u>, ff:(unit -> unit)) =
         fun stream ->
             try p stream finally ff ()
+
+type QuotedParserCombinator() =
+    inherit ParserCombinator()
+
+    member x.Quote () = ()
 
 let parse = ParserCombinator()
 

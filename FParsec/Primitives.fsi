@@ -394,21 +394,28 @@ val chainr:  Parser<'a,'u> -> Parser<('a -> 'a -> 'a),'u> -> 'a -> Parser<'a,'u>
 
 /// The type of the "builder object" that can be used to build parsers with
 /// F#'s "computation expression" syntax a.k.a. "workflow" syntax.
-[<Sealed>]
+//[<Sealed>]
 type ParserCombinator =
     new : unit -> ParserCombinator
     member Delay: f:(unit -> Parser<'a,'u>) -> Parser<'a,'u>
     member Return: 'a -> Parser<'a,'u>
     member Bind: Parser<'a,'u>*('a -> Parser<'b,'u>) -> Parser<'b,'u>
-    member Bind2: (Parser<'a, 'state> * Parser<'b, 'state>) * f: ('a -> 'b -> Parser<'c, 'state>) -> Parser<'c, 'state>
-    member Bind3: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state>) * f: ('a -> 'b -> 'c -> Parser<'d, 'state>) -> Parser<'d, 'state>
-    member Bind4: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state>) * f: ('a -> 'b -> 'c -> 'd -> Parser<'e, 'state>) -> Parser<'e, 'state>
-    member Bind5: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state> * Parser<'e, 'state>) * f: ('a -> 'b -> 'c -> 'd -> 'e -> Parser<'f, 'state>) -> Parser<'f, 'state>
+    member BindReturn: Parser<'a, 'u> * ('a -> 'b) -> Parser<'b, 'u>
+    member MergeSources: Parser<'a, 'u> * Parser<'b, 'u> -> Parser<'a * 'b, 'u>
+//    member Bind2: Parser<'a, 'state> * Parser<'b, 'state> * ('a -> 'b -> Parser<'c, 'state>) -> Parser<'c, 'state>
+//    member Bind3: Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * ('a -> 'b -> 'c -> Parser<'d, 'state>) -> Parser<'d, 'state>
+//    member Bind4: Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state> * ('a -> 'b -> 'c -> 'd -> Parser<'e, 'state>) -> Parser<'e, 'state>
+//    member Bind5: Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state> * Parser<'e, 'state> * ('a -> 'b -> 'c -> 'd -> 'e -> Parser<'f, 'state>) -> Parser<'f, 'state>
     member Zero: unit -> Parser<'a,'u>
     member ReturnFrom: Parser<'a,'u> -> Parser<'a,'u>
     // no Combine member by purpose
     member TryWith: p:Parser<'a,'u> * cf:(exn -> Parser<'a,'u>) -> Parser<'a,'u>
     member TryFinally: p:Parser<'a,'u>* ff:(unit -> unit) -> Parser<'a,'u>
+
+type QuotedParserCombinator =
+  inherit ParserCombinator
+  new : unit -> QuotedParserCombinator
+  member Quote: unit -> unit
 
 /// The builder object for building parsers using F#'s computation expression syntax.
 val parse : ParserCombinator
