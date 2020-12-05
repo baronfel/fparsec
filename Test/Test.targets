@@ -12,7 +12,7 @@
     <DefineConstants>$(DefineConstants);USE_STATIC_MAPPING_FOR_IS_ANY_OF</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' or '$(TargetFramework)' == 'net5.0'">
     <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
   </PropertyGroup>
 
@@ -32,14 +32,17 @@
     <Compile Include="OperatorPrecedenceParserTests.fs" />
     <Compile Include="RangeTests.fs" />
     <Compile Include="StaticMappingTests.fs" />
+    <Compile Include="CETests.fs" />
     <Compile Include="AllTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.3.4" />
+    <!-- allows for building net4x versions on systems that don't have netfx/mono installed -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' or '$(TargetFramework)' == 'net5.0'">
     <PackageReference Include="System.Globalization.Extensions" Version="4.*" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.*" />
   </ItemGroup>

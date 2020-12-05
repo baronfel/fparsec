@@ -258,7 +258,6 @@ let pipe5 (p1: Parser<'a,'u>) (p2: Parser<'b,'u>) (p3: Parser<'c,'u>) (p4: Parse
         reply.Error <- error
         reply
 
-
 // -----------------------------------------------
 // Parsing alternatives and recovering from errors
 // -----------------------------------------------
@@ -923,7 +922,11 @@ let chainr p op x = chainr1 p op <|>% x
 type ParserCombinator() =
     member t.Delay(f:(unit -> Parser<'a,'u>)) = fun stream -> (f()) stream
     member t.Return(x) = preturn x
-    member t.Bind(p, f) = p >>= f
+    member t.Bind(p: Parser<'a, 'state>, f : 'a -> Parser<'b, 'state>): Parser<'b, 'state> = p >>= f
+    member t.Bind2((p1: Parser<'a, 'state>, p2: Parser<'b, 'state>), f: 'a -> 'b -> Parser<'c, 'state>): Parser<'c, 'state> = pipe2 p1 p2 f
+    member t.Bind3((p1, p2, p3), f) = pipe3 p1 p2 p3 f
+    member t.Bind4((p1, p2, p3, p4), f) = pipe4 p1 p2 p3 p4 f
+    member t.Bind5((p1, p2, p3, p4, p5), f) = pipe5 p1 p2 p3 p4 p5 f
     member t.Zero() : Parser<'a,'u> = pzero
     member t.ReturnFrom(p: Parser<'a,'u>) = p
     // no Combine member by purpose

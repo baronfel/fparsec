@@ -28,6 +28,8 @@ let run() =
     FParsec.Test.OperatorPrecedenceParserTests.run()
     printfn "Testing FParsec.IdentifierValidator ..."
     FParsec.Test.IdentifierValidatorTests.run()
+    printfn "Testing FParsec.CETests ..."
+    FParsec.Test.CETests.run()
 #if LOW_TRUST
 #else
     printfn "Testing FParsec.StaticMapping ... "

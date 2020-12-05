@@ -1,11 +1,7 @@
 language: csharp
 
 mono: 5.18.0
-dotnet: 3.0.100
-
-install:
-  # workaround for missing .net 4.5 targing pack
-  - export FrameworkPathOverride=$(dirname $(which mono))/../lib/mono/4.5/
+dotnet: 5.0.100
 
 script:
   - dotnet build FParsec.sln -c $CONFIGURATION -v n
@@ -20,7 +16,7 @@ env:
   - CONFIGURATION=Release-LowTrust
     TFM=net45
   - CONFIGURATION=Release-LowTrust
-    TFM=netcoreapp3.0
+    TFM=net5.0
     RUN_TESTS=1
 
 matrix:
