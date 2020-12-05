@@ -99,8 +99,7 @@ let (.>>) (p: Parser<'a,'u>) (q: Parser<'b,'u>) =
             reply1.Status <- reply2.Status
         reply1
 
-
-let (.>>.) (p: Parser<'a,'u>) (q: Parser<'b,'u>) =
+let zip (p: Parser<'a,'u>) (q: Parser<'b,'u>) =
     fun stream ->
         let reply1 = p stream
         if reply1.Status = Ok then
@@ -113,6 +112,8 @@ let (.>>.) (p: Parser<'a,'u>) (q: Parser<'b,'u>) =
             Reply(reply2.Status, result, error)
         else
             Reply(reply1.Status, reply1.Error)
+
+let (.>>.) (p: Parser<'a,'u>) (q: Parser<'b,'u>) = zip p q
 
 let between (popen: Parser<_,'u>) (pclose: Parser<_,'u>) (p: Parser<_,'u>) =
     fun stream ->
@@ -923,10 +924,15 @@ type ParserCombinator() =
     member t.Delay(f:(unit -> Parser<'a,'u>)) = fun stream -> (f()) stream
     member t.Return(x) = preturn x
     member t.Bind(p: Parser<'a, 'state>, f : 'a -> Parser<'b, 'state>): Parser<'b, 'state> = p >>= f
-    member t.Bind2((p1: Parser<'a, 'state>, p2: Parser<'b, 'state>), f: 'a -> 'b -> Parser<'c, 'state>): Parser<'c, 'state> = pipe2 p1 p2 f
-    member t.Bind3((p1, p2, p3), f) = pipe3 p1 p2 p3 f
-    member t.Bind4((p1, p2, p3, p4), f) = pipe4 p1 p2 p3 p4 f
-    member t.Bind5((p1, p2, p3, p4, p5), f) = pipe5 p1 p2 p3 p4 p5 f
+    member t.Bind2((p1: Parser<'a, 'state>, p2: Parser<'b, 'state>), f: 'a -> 'b -> Parser<'c, 'state>): Parser<'c, 'state> =
+            let tup = zip p1 p2
+            tup >>= fun (p, q) -> f p q
+    member t.Bind3((p1, p2, p3), f) =
+         zip (zip p1 p2) p3 >>= (fun ((p1, p2), p3) -> f p1 p2 p3)
+    member t.Bind4((p1, p2, p3, p4), f) =
+        zip (zip (zip p1 p2) p3) p4 >>= (fun (((p1, p2), p3), p4) -> f p1 p2 p3 p4)
+    member t.Bind5((p1, p2, p3, p4, p5), f) =
+        zip (zip (zip (zip p1 p2) p3) p4) p5 >>= (fun ((((p1, p2), p3), p4), p5) -> f p1 p2 p3 p4 p5)
     member t.Zero() : Parser<'a,'u> = pzero
     member t.ReturnFrom(p: Parser<'a,'u>) = p
     // no Combine member by purpose

@@ -293,7 +293,7 @@ val sepEndBy1: Parser<'a,'u> -> Parser<'b,'u> -> Parser<'a list,'u>
 val skipSepEndBy1: Parser<'a,'u> -> Parser<'b,'u> -> Parser<unit,'u>
 
 
-/// The `parser manyTill p endp` repeatedly applies the parser `p` 
+/// The `parser manyTill p endp` repeatedly applies the parser `p`
 /// for as long as `endp` fails (without changing the parser state).
 /// It returns a list of the results returned by `p`.
 val manyTill: Parser<'a,'u> -> Parser<'b,'u> -> Parser<'a list,'u>
@@ -400,6 +400,10 @@ type ParserCombinator =
     member Delay: f:(unit -> Parser<'a,'u>) -> Parser<'a,'u>
     member Return: 'a -> Parser<'a,'u>
     member Bind: Parser<'a,'u>*('a -> Parser<'b,'u>) -> Parser<'b,'u>
+    member Bind2: (Parser<'a, 'state> * Parser<'b, 'state>) * f: ('a -> 'b -> Parser<'c, 'state>) -> Parser<'c, 'state>
+    member Bind3: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state>) * f: ('a -> 'b -> 'c -> Parser<'d, 'state>) -> Parser<'d, 'state>
+    member Bind4: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state>) * f: ('a -> 'b -> 'c -> 'd -> Parser<'e, 'state>) -> Parser<'e, 'state>
+    member Bind5: (Parser<'a, 'state> * Parser<'b, 'state> * Parser<'c, 'state> * Parser<'d, 'state> * Parser<'e, 'state>) * f: ('a -> 'b -> 'c -> 'd -> 'e -> Parser<'f, 'state>) -> Parser<'f, 'state>
     member Zero: unit -> Parser<'a,'u>
     member ReturnFrom: Parser<'a,'u> -> Parser<'a,'u>
     // no Combine member by purpose

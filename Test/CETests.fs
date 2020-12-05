@@ -8,7 +8,7 @@ open FParsec.CharParsers
 
 open FParsec.Test.Test
 
-let monadicParser (): Parser<string * string , unit> = 
+let monadicParser (): Parser<string * string , unit> =
     parse {
         let letters = many1Chars (satisfy isLetter)
         do! spaces
@@ -18,20 +18,20 @@ let monadicParser (): Parser<string * string , unit> =
         return token1, token2
     }
 
-let applicativeParser () = 
+let applicativeParser () =
     parse {
         let letters = many1Chars (satisfy isLetter)
         let! _ = spaces
         and! token1 = letters
-        // and! _ = spaces
-        // and! token2 = letters
-        return token1 //, token2
+        and! _ = spaces
+        and! token2 = letters
+        return token1 token2
     }
 
-let testMonadicCE () = 
-    ROk "   hi hello" 0 ("hi", "hello") (monadicParser()) 
+let testMonadicCE () =
+    ROk "   hi hello" 0 ("hi", "hello") (monadicParser())
 
-let testApplicativeCE () =  
+let testApplicativeCE () =
     ROk "   hi hello" 0 "hi" (applicativeParser())
 
 
